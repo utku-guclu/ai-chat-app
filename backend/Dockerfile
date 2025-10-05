@@ -3,9 +3,17 @@ FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
+# Install Git so Go can download modules directly if GOPROXY=direct is used
+RUN apk add --no-cache git
+# ---------------------------
+
 # Copy go.mod and go.sum files and download dependencies
 COPY go.mod go.sum ./
-RUN GOPROXY=direct go mod download
+RUN go mod download
+
+# # Tidy the modules to ensure all imports are resolved and stored correctly
+RUN go mod tidy
+# # ---------------------------
 
 # Copy the rest of the source code
 COPY . .
